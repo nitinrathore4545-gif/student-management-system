@@ -1,4 +1,5 @@
 import { createEnrollment,getStudentResult } from "../models/enrollmentModel.js";
+import pool from "../config/db.js"
 
 export const enrollStudent = async(req,res)=>{
     try{
@@ -79,3 +80,34 @@ export const getResult = async (req,res)=>{
             })
         }
 }
+export const getEnrollments = async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT
+                e.id AS enrollment_id,
+                s.id AS student_id,
+                s.name AS student_name,
+                c.id AS course_id,
+                c.course_name
+            FROM enrollments e
+            JOIN students s
+                ON e.student_id = s.id
+            JOIN courses c
+                ON e.course_id = c.id
+            ORDER BY e.id DESC
+        `);
+
+        res.json({
+            success: true,
+            data: rows
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch enrollments"
+        });
+    }
+};
