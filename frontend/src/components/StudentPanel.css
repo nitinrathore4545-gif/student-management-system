@@ -1,0 +1,374 @@
+.student-section-header {
+    margin-top: 22px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #252d36;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.section-label {
+    display: block;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    margin-bottom: 4px;
+}
+
+.student-section-header h3 {
+    margin: 0;
+    color: #f1f5f9;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.student-count {
+    padding: 4px 8px;
+    border: 1px solid #303944;
+    border-radius: 5px;
+
+    color: #60a5fa;
+    background: #10161d;
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+}
+
+
+/* Search */
+.search-box {
+    margin-top: 18px;
+    display: flex;
+    gap: 8px;
+}
+
+.search-box input {
+    min-width: 0;
+    flex: 1;
+    padding: 11px 12px;
+
+    background: #0d1115;
+    color: #f1f5f9;
+
+    border: 1px solid #303944;
+    border-radius: 7px;
+
+    outline: none;
+    font-size: 13px;
+
+    transition: 0.2s ease;
+}
+
+.search-box input:focus {
+    border-color: #4b6f99;
+    background: #10161d;
+}
+
+.search-box input::placeholder {
+    color: #64748b;
+}
+
+.search-box button {
+    padding: 9px 13px;
+
+    background: #182433;
+    color: #93c5fd;
+
+    border: 1px solid #30445a;
+    border-radius: 7px;
+
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.search-box button:hover {
+    background: #203044;
+    border-color: #4b6f99;
+    transform: translateY(-1px);
+}
+
+
+/* Student List */
+
+.student-list {
+    margin-top: 14px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.student-card {
+    padding: 14px;
+
+    border: 1px solid #303944;
+    border-radius: 9px;
+
+    background: #181e25;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.student-card:hover {
+    background: #1b222a;
+    border-color: #46515c;
+    transform: translateY(-1px);
+}
+
+.student-card strong,
+.student-card span,
+.student-card small {
+    display: block;
+}
+
+.student-card strong {
+    color: #f1f5f9;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.student-card span {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.student-card small {
+    color: #60a5fa;
+    font-size: 11px;
+    margin-top: 7px;
+}
+
+
+/* Student Actions */
+
+.student-card button {
+    padding: 6px 12px;
+    margin-top: 11px;
+    margin-right: 7px;
+
+    background: #252e38;
+    color: #f1f5f9;
+
+    border: 1px solid #3b4652;
+    border-radius: 6px;
+
+    cursor: pointer;
+    font-size: 12px;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.student-card button:hover {
+    background: #303a46;
+    border-color: #64748b;
+    transform: translateY(-1px);
+}
+
+
+/* Forms */
+
+.add-form {
+    margin-top: 18px;
+    padding: 16px;
+
+    border: 1px solid #303944;
+    border-radius: 10px;
+
+    background: #181e25;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.add-form h3 {
+    margin: 0 0 4px;
+
+    color: #f1f5f9;
+    font-size: 16px;
+}
+
+.add-form input,
+.add-form select {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 11px 12px;
+
+    background: #0d1115;
+    color: #f1f5f9;
+
+    border: 1px solid #303944;
+    border-radius: 7px;
+
+    outline: none;
+    font-size: 14px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.add-form input:focus,
+.add-form select:focus {
+    border-color: #4b6f99;
+    background: #10161d;
+}
+
+.add-form input::placeholder {
+    color: #64748b;
+}
+
+.add-form button {
+    width: 100%;
+
+    padding: 10px 14px;
+
+    background: #252e38;
+    color: #f1f5f9;
+
+    border: 1px solid #3b4652;
+    border-radius: 7px;
+
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.add-form button:hover {
+    background: #303a46;
+    border-color: #64748b;
+    transform: translateY(-1px);
+}
+
+
+/* Pagination */
+
+.pagination {
+    margin-top: 18px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+
+    background: #252e38;
+    color: #f1f5f9;
+
+    border: 1px solid #3b4652;
+    border-radius: 7px;
+
+    cursor: pointer;
+    font-size: 12px;
+
+    transition: 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background: #303a46;
+    border-color: #64748b;
+}
+
+.pagination button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.pagination span {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+
+/* Status */
+
+.panel-status {
+    margin-top: 18px;
+    padding: 14px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    border: 1px dashed #303944;
+    border-radius: 8px;
+
+    background: rgba(13, 17, 21, 0.5);
+
+    font-size: 13px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 768px) {
+    .search-box {
+        flex-direction: column;
+    }
+
+    .search-box button {
+        width: 100%;
+    }
+
+    .student-section-header {
+        align-items: center;
+    }
+
+    .student-card {
+        padding: 13px;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    .pagination button {
+        flex: 1;
+    }
+}
+.student-actions {
+    margin-top: 18px;
+}
+
+.add-student-btn {
+    width: 100%;
+    padding: 11px 14px;
+
+    background: #182433;
+    color: #93c5fd;
+
+    border: 1px solid #30445a;
+    border-radius: 7px;
+
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.add-student-btn:hover {
+    background: #203044;
+    border-color: #4b6f99;
+    transform: translateY(-1px);
+}

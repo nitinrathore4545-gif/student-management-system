@@ -1,0 +1,321 @@
+/* ============================= */
+/* Result Section */
+/* ============================= */
+
+.result-section {
+    margin-top: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-section select {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 11px 12px;
+
+    background: #0d1115;
+    color: #f1f5f9;
+
+    border: 1px solid #303944;
+    border-radius: 7px;
+
+    outline: none;
+    font-size: 14px;
+
+    transition: border-color 0.2s ease,
+                background 0.2s ease;
+}
+
+.result-section select:focus {
+    border-color: #64748b;
+    background: #11161c;
+}
+
+.result-section button {
+    width: 100%;
+    padding: 11px 14px;
+
+    background: #252e38;
+    color: #f1f5f9;
+
+    border: 1px solid #3b4652;
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.result-section button:hover {
+    background: #303a46;
+    border-color: #64748b;
+    transform: translateY(-1px);
+}
+
+.result-section button:active {
+    transform: translateY(0);
+}
+
+
+/* ============================= */
+/* Result Card */
+/* ============================= */
+
+.result-card {
+    margin-top: 14px;
+    padding: 16px;
+
+    background: #181e25;
+
+    border: 1px solid #303944;
+    border-radius: 10px;
+
+    animation: resultCardIn 0.3s ease-out;
+}
+
+.result-card h3 {
+    margin-top: 0;
+    margin-bottom: 14px;
+
+    color: #f1f5f9;
+    font-size: 18px;
+}
+
+.result-card p {
+    color: #cbd5e1;
+    margin: 8px 0;
+}
+
+
+/* ============================= */
+/* Result Summary */
+/* ============================= */
+
+.result-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.result-summary div {
+    padding: 12px;
+
+    background: #0d1115;
+
+    border: 1px solid #303944;
+    border-radius: 8px;
+
+    text-align: center;
+
+    transition:
+        border-color 0.2s ease,
+        transform 0.15s ease;
+}
+
+.result-summary div:hover {
+    border-color: #46515c;
+    transform: translateY(-1px);
+}
+
+.result-summary small {
+    display: block;
+
+    color: #64748b;
+    font-size: 11px;
+
+    margin-bottom: 6px;
+}
+
+.result-summary strong {
+    display: block;
+
+    color: #f1f5f9;
+    font-size: 16px;
+}
+
+
+/* ============================= */
+/* Subject List */
+/* ============================= */
+
+.subject-list {
+    margin-top: 12px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.subject-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 12px;
+
+    background: #0d1115;
+
+    border: 1px solid #303944;
+    border-radius: 7px;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.subject-card:hover {
+    background: #11161c;
+    border-color: #46515c;
+}
+
+.subject-card span {
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+.subject-card strong {
+    color: #f1f5f9;
+    font-size: 13px;
+}
+
+
+/* ============================= */
+/* Loading / Empty State */
+/* ============================= */
+
+.panel-status {
+    margin-top: 18px;
+    padding: 14px;
+
+    text-align: center;
+
+    color: #64748b;
+
+    border: 1px dashed #303944;
+    border-radius: 8px;
+
+    background: rgba(13, 17, 21, 0.5);
+}
+
+
+/* ============================= */
+/* Animation */
+/* ============================= */
+
+@keyframes resultCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================= */
+/* Mobile */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+    .result-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .result-card {
+        padding: 14px;
+    }
+
+    .subject-card {
+        padding: 10px;
+    }
+}
+/* ============================= */
+/* Result Header */
+/* ============================= */
+
+.result-section-header {
+    margin-top: 8px;
+    padding-bottom: 10px;
+
+    border-bottom: 1px solid #252d36;
+}
+
+.section-label {
+    display: block;
+    margin-bottom: 4px;
+
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 1.4px;
+}
+
+.result-label {
+    color: #f59e0b;
+}
+
+.result-section-header h3 {
+    margin: 0;
+
+    color: #f1f5f9;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+/* ============================= */
+/* Add Marks Button */
+/* ============================= */
+
+.add-marks-btn {
+    background: #33280f !important;
+    border-color: #66501b !important;
+    color: #fbbf24 !important;
+}
+
+.add-marks-btn:hover {
+    background: #403314 !important;
+    border-color: #8a6b20 !important;
+}
+
+
+/* ============================= */
+/* View Result Button */
+/* ============================= */
+
+.view-result-btn {
+    background: #252e38 !important;
+}
+
+
+/* ============================= */
+/* Result Card Header */
+/* ============================= */
+
+.result-card-header {
+    margin-bottom: 14px;
+}
+
+.result-card-header h3 {
+    margin: 0;
+
+    color: #f1f5f9;
+    font-size: 18px;
+    font-weight: 600;
+}

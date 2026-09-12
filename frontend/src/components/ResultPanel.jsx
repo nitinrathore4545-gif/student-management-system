@@ -1,3 +1,6 @@
+import "./ResultPanel.css"    
+    
+    
     function ResultPanel({
     showMarksForm,
         setShowMarksForm,
@@ -20,12 +23,14 @@
             <div className="result-section">
 
                 {/* Add Marks */}
-                <button onClick={() => setShowMarksForm(true)}>
+                <button
+                 className="add-marks-btn"
+                onClick={() => setShowMarksForm(true)}>
                     Add Marks
                 </button>
 
                 {showMarksForm && (
-                    <div className="add-form">
+                    <div className="add-form marks-form">
                         <h3>Add Marks</h3>
 
                         <select
@@ -98,6 +103,15 @@
                 )}
 
                 {/* View Result */}
+                <div className="result-section-header">
+    <div>
+        <span className="section-label result-label">
+            RESULT RECORD
+        </span>
+
+        <h3>View Student Result</h3>
+    </div>
+</div>
                <select 
     value={selectedResultStudent} 
     onChange={(e) => {
@@ -119,7 +133,9 @@
                     ))}
                 </select>
 
-                <button onClick={loadStudentResult}>
+                <button 
+                className="view-result-btn"
+                onClick={loadStudentResult}>
                     View Result
                 </button>
 
@@ -140,10 +156,14 @@
                 {/* Result */}
                 {studentResult && (
                     <div className="result-card">
-
-                        <h3>
-                            {studentResult.student?.name}
-                        </h3>
+                          <div className="result-card-header">
+            <span className="section-label result-label">
+                STUDENT RESULT
+            </span>
+  <h3>
+                {studentResult.student?.name}
+            </h3>
+        </div>
 
                         <div className="result-summary">
 

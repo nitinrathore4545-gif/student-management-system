@@ -1,21 +1,101 @@
+import "./CoursePanel.css"
+
+
 function CoursePanel({
-    courses,
+       courses, 
     courseLoading,
     students,
     enrollments,
+
     selectedStudent,
     setSelectedStudent,
     selectedCourse,
     setSelectedCourse,
     showAssignForm,
     setShowAssignForm,
-    assignCourse
+    assignCourse,
+
+    showCourseForm,
+    setShowCourseForm,
+    courseFormData,
+    setCourseFormData,
+    addCourse
 }) {
     return (
         <>
-            <button onClick={() => setShowAssignForm(true)}>
-                Assign Course
-            </button>
+       <div className="course-actions">
+
+    <button
+        className="add-course-btn"
+        onClick={() => {
+            setCourseFormData({
+                course_name: "",
+                duration: ""
+            });
+
+            setShowCourseForm(true);
+        }}
+    >
+        + Add Course
+    </button>
+
+    <button
+        className="assign-course-btn"
+        onClick={() => setShowAssignForm(true)}
+    >
+        Assign Course
+    </button>
+
+</div>
+
+{showCourseForm && (
+    <div className="add-form course-form">
+
+        <h3>Add New Course</h3>
+
+        <input
+            type="text"
+            placeholder="Course Name"
+            value={courseFormData.course_name}
+            onChange={(e) =>
+                setCourseFormData({
+                    ...courseFormData,
+                    course_name: e.target.value
+                })
+            }
+        />
+
+        <input
+            type="text"
+            placeholder="Duration e.g. 3 Months"
+            value={courseFormData.duration}
+            onChange={(e) =>
+                setCourseFormData({
+                    ...courseFormData,
+                    duration: e.target.value
+                })
+            }
+        />
+
+        <button onClick={addCourse}>
+            Add Course
+        </button>
+
+        <button
+            onClick={() => {
+                setShowCourseForm(false);
+
+                setCourseFormData({
+                    course_name: "",
+                    duration: ""
+                });
+            }}
+        >
+            Cancel
+        </button>
+
+    </div>
+)}
 
             {showAssignForm && (
                 <div className="add-form">
@@ -72,6 +152,18 @@ function CoursePanel({
                     </button>
                 </div>
             )}
+            <div className="course-section-header">
+    <div>
+        <span className="section-label course-label">
+            COURSE CATALOG
+        </span>
+        <h3>Available Courses</h3>
+    </div>
+
+    <span className="course-count">
+        {courses.length} COURSES
+    </span>
+</div>
 
             <div className="course-list">
                {courseLoading ? ( 
@@ -106,33 +198,46 @@ function CoursePanel({
                 )}
             </div>
 
-            <div className="enrollment-list">
-                <h3>Assigned Courses</h3>
+        <div className="enrollment-list">
+    <div className="course-section-header">
+        <div>
+            <span className="section-label course-label">
+                ENROLLMENT RECORD
+            </span>
 
-                {enrollments.length === 0 ? (
-                    <p>No courses assigned yet.</p>
-                ) : (
-                    enrollments.map((enrollment) => (
-                        <div
-                            className="enrollment-card"
-                            key={enrollment.enrollment_id}
-                        >
-                            <strong>
-                                {enrollment.student_name}
-                            </strong>
+            <h3>Assigned Courses</h3>
+        </div>
 
-                            <span>
-                                {enrollment.course_name}
-                            </span>
+        <span className="course-count">
+            {enrollments.length} ASSIGNED
+        </span>
+    </div>
 
-                            <small>
-                                Enrollment ID:{" "}
-                                {enrollment.enrollment_id}
-                            </small>
-                        </div>
-                    ))
-                )}
+    {enrollments.length === 0 ? (
+        <p className="panel-status">
+            No courses assigned yet.
+        </p>
+    ) : (
+        enrollments.map((enrollment) => (
+            <div
+                className="enrollment-card"
+                key={enrollment.enrollment_id}
+            >
+                <strong>
+                    {enrollment.student_name}
+                </strong>
+
+                <span>
+                    {enrollment.course_name}
+                </span>
+
+                <small>
+                    Enrollment ID: {enrollment.enrollment_id}
+                </small>
             </div>
+        ))
+    )}
+</div>
         </>
     );
 }

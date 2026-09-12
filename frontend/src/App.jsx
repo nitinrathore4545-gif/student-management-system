@@ -5,6 +5,7 @@ import StudentPanel from "./components/StudentPanel";
 import api from "./services/api";
 import CoursePanel from "./components/CoursePanel";
 import ResultPanel from "./components/ResultPanel";
+import "./App.css"
 
 function App() {
     const [activeHub, setActiveHub] = useState(null);
@@ -12,20 +13,24 @@ function App() {
     const [loading,setLoading] = useState(false)
 
     const [showAddForm,setShowAddForm] = useState(false)
-    const [showSearch, setShowSearch] = useState(false);
     const [page, setPage] = useState(1);
-const [limit] = useState(5);
+const limit = 5
 const [totalStudents, setTotalStudents] = useState(0);
 const [searchName, setSearchName] = useState("");
 const [editingStudent, setEditingStudent] = useState(null);
 const [showEditForm, setShowEditForm] = useState(false);
 const [courses, setCourses] = useState([]);
 const [courseLoading, setCourseLoading] = useState(false);
+const [showCourseForm, setShowCourseForm] = useState(false);
+
+const [courseFormData, setCourseFormData] = useState({
+    course_name: "",
+    duration: ""
+});
 const [selectedStudent, setSelectedStudent] = useState("");
 const [selectedCourse, setSelectedCourse] = useState("");
 const [showAssignForm, setShowAssignForm] = useState(false);
 
-const [resultStudents, setResultStudents] = useState([]);
 const [selectedResultStudent, setSelectedResultStudent] = useState("");
 const [studentResult, setStudentResult] = useState(null);
 const [resultLoading, setResultLoading] = useState(false);
@@ -45,11 +50,24 @@ const [marksData, setMarksData] = useState({
     max_marks: 100
 });
 const [enrollments, setEnrollments] = useState([]);
+
+
 useEffect(() => {
     if (activeHub === "Student Hub") {
         loadStudents();
     }
-}, [page]);
+
+    if (activeHub === "Course Hub") {
+        loadCourses();
+        loadStudents();
+        loadEnrollments();
+    }
+
+    if (activeHub === "Result Hub") {
+        loadStudents();
+        loadEnrollments();
+    }
+}, [activeHub, page]);
 
 const loadStudents = async () => {
     try {
@@ -57,7 +75,7 @@ const loadStudents = async () => {
     const response = await api.get(
     `/students?page=${page}&limit=${limit}`
 );
-console.log("API RESPONSE:", response.data);
+
 
 setStudents(response.data.data);
 setTotalStudents(response.data.count);
@@ -105,7 +123,6 @@ const loadCourses = async () => {
     "/courses"
 );
 
-        console.log("COURSES RESPONSE:", response.data);
 
         setCourses(response.data.data);
 
@@ -115,13 +132,40 @@ const loadCourses = async () => {
         setCourseLoading(false);
     }
 };
+const addCourse = async () => {
+    try {
+        if (!courseFormData.course_name || !courseFormData.duration) {
+            alert("Please fill all fields");
+            return;
+        }
+
+        await api.post("/courses", courseFormData);
+
+        alert("Course added successfully!");
+
+        setCourseFormData({
+            course_name: "",
+            duration: ""
+        });
+
+        setShowCourseForm(false);
+
+        loadCourses();
+
+    } catch (error) {
+        console.error("Failed to add course:", error);
+
+        alert(
+            error.response?.data?.message ||
+            "Failed to add course"
+        );
+    }
+};
 const loadEnrollments = async () => {
     try {
       const response = await api.get(
     "/enrollments"
 );
-        console.log("ENROLLMENTS:", response.data);
-
         setEnrollments(response.data.data);
 
     } catch (error) {
@@ -142,7 +186,6 @@ const response = await api.post(
     }
 );
 
-        console.log("ENROLLMENT RESPONSE:", response.data);
 
         alert("Course assigned successfully!");
 
@@ -172,8 +215,6 @@ const loadStudentResult = async () => {
     `/enrollments/student/${selectedResultStudent}/result`
 );
 
-        console.log("RESULT RESPONSE:", response.data);
-
         setStudentResult(response.data);
 
     } catch (error) {
@@ -190,7 +231,6 @@ const addStudent = async () => {
     formData
 );
 
-        console.log("STUDENT ADDED:", response.data);
 
         setFormData({
             name: "",
@@ -217,7 +257,7 @@ const searchStudents = async () => {
       const response = await api.get(
     `/students/search/${searchName}`
 );
-        console.log("SEARCH RESPONSE:", response.data);
+     
 
         setStudents(response.data.data);
 
@@ -234,7 +274,6 @@ const deleteStudent = async (id) => {
     `/students/${id}`
 );
 
-        console.log("Student deleted");
 
         loadStudents();
 
@@ -249,7 +288,6 @@ const updateStudent = async () => {
     formData
 );
 
-        console.log("Student updated");
 
         setShowEditForm(false);
         setEditingStudent(null);
@@ -297,26 +335,9 @@ const updateStudent = async () => {
         height: "100vh"
     }}
 >
-              <CampusScene
-              activeHub={activeHub}
-    setActiveHub={(hub) => {
-        setActiveHub(hub);
-
-      if (hub === "Student Hub") {
-    loadStudents();
-}
-
-if (hub === "Course Hub") {
-    loadCourses();
-    loadStudents();
-    loadEnrollments()
-}
-
-if (hub === "Result Hub") {
-    loadStudents();
-    loadEnrollments()
-}
-    }}
+            <CampusScene 
+    activeHub={activeHub}
+    setActiveHub={setActiveHub}
 />
             </Canvas>
 
@@ -338,8 +359,7 @@ if (hub === "Result Hub") {
 {/* Student Hub */}
 {activeHub === "Student Hub" && (
     <StudentPanel
-        showSearch={showSearch}
-        setShowSearch={setShowSearch}
+        
         searchName={searchName}
         setSearchName={setSearchName}
         searchStudents={searchStudents}
@@ -385,6 +405,13 @@ if (hub === "Result Hub") {
         setShowAssignForm={setShowAssignForm}
 
         assignCourse={assignCourse}
+        showCourseForm={showCourseForm}
+setShowCourseForm={setShowCourseForm}
+
+courseFormData={courseFormData}
+setCourseFormData={setCourseFormData}
+
+addCourse={addCourse}
     />
 )}
  {/* Result Hub */}

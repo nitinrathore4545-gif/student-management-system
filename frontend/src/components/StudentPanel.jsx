@@ -1,6 +1,7 @@
+import "./StudentPanel.css"
+
+
 function StudentPanel({
-    showSearch,
-    setShowSearch,
     searchName,
     setSearchName,
     searchStudents,
@@ -27,30 +28,53 @@ limit,
 }) {
     return (
         <>
-            {showSearch && (
-                <div className="search-box">
-                    <input
-                        type="text"
-                        placeholder="Search student by name"
-                        value={searchName}
-                        onChange={(e) => setSearchName(e.target.value)}
-                    />
+        <div className="student-actions">
+   <button
+    className="add-student-btn"
+    onClick={() => {
+        setFormData({
+            name: "",
+            email: "",
+            phone: "",
+            age: "",
+            course: ""
+        });
 
-                    <button onClick={searchStudents}>
-                        Search
-                    </button>
+        setShowAddForm(true);
+    }}
+>
+    + Add Student
+</button>
+</div>
+         <div className="search-box">
+    <input
+        type="text"
+        placeholder="Search student by name..."
+        value={searchName}
+        onChange={(e) => setSearchName(e.target.value)}
+        onKeyDown={(e) => {
+            if (e.key === "Enter") {
+                searchStudents();
+            }
+        }}
+    />
 
-                    <button
-                        onClick={() => {
-                            setShowSearch(false);
-                            setSearchName("");
-                            setPage(1);
-                        }}
-                    >
-                        Clear
-                    </button>
-                </div>
-            )}
+    <button onClick={searchStudents}>
+        Search
+    </button>
+
+    {searchName && (
+        <button
+            onClick={() => {
+                setSearchName("");
+                setPage(1);
+                loadStudents();
+            }}
+        >
+            Clear
+        </button>
+    )}
+</div>
 
             {showEditForm && (
                 <div className="add-form">
@@ -196,6 +220,16 @@ limit,
                     </button>
                 </div>
             )}
+            <div className="student-section-header">
+    <div>
+        <span className="section-label">STUDENT DIRECTORY</span>
+        <h3>All Students</h3>
+    </div>
+
+    <span className="student-count">
+        {totalStudents} TOTAL
+    </span>
+</div>
 
             <div className="student-list">
               {loading ? (
