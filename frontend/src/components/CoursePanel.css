@@ -352,3 +352,143 @@
     background: #1d3324;
     border-color: #4ade80;
 }
+.delete-course-btn {
+    width: 100%;
+
+    margin-top: 10px;
+    padding: 8px 12px;
+
+    background: #241719;
+    color: #f87171;
+
+    border: 1px solid #5b2929;
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.delete-course-btn:hover {
+    background: #321b1d;
+    border-color: #8f3b3b;
+
+    transform: translateY(-1px);
+}
+/* ============================= */
+/* Delete Confirmation Modal */
+/* ============================= */
+
+.delete-modal-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.72);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;
+}
+
+.delete-modal {
+    width: 320px;
+    padding: 22px;
+
+    background: #11161c;
+
+    border: 1px solid #3b4652;
+    border-radius: 12px;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+    animation: deleteModalIn 0.2s ease-out;
+}
+
+.delete-modal-label {
+    display: block;
+
+    color: #f87171;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 1.5px;
+
+    margin-bottom: 8px;
+}
+
+.delete-modal h3 {
+    margin: 0;
+
+    color: #f1f5f9;
+
+    font-size: 18px;
+}
+
+.delete-modal p {
+    margin: 10px 0 20px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.delete-modal-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.delete-confirm-btn,
+.delete-cancel-btn {
+    flex: 1;
+
+    padding: 10px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.delete-confirm-btn {
+    background: #321b1d;
+    color: #f87171;
+
+    border: 1px solid #713535;
+}
+
+.delete-confirm-btn:hover {
+    background: #452124;
+    border-color: #a34a4a;
+}
+
+.delete-cancel-btn {
+    background: #18202a;
+    color: #cbd5e1;
+
+    border: 1px solid #35404d;
+}
+
+.delete-cancel-btn:hover {
+    background: #222b35;
+}
+
+@keyframes deleteModalIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

@@ -19,7 +19,10 @@ function CoursePanel({
     setShowCourseForm,
     courseFormData,
     setCourseFormData,
-    addCourse
+    addCourse,
+deleteCourse,
+deleteCourseId,
+setDeleteCourseId
 }) {
     return (
         <>
@@ -176,24 +179,25 @@ function CoursePanel({
         </p>
     ) : ( 
                     courses.map((course) => (
-                        <div
-                            className="course-card"
-                            key={course.id}
-                        >
-                            <strong>
-                                {course.course_name}
-                            </strong>
+                      <div className="course-card" key={course.id}>
+    <strong>
+        {course.course_name}
+    </strong>
 
-                            <span>
-                                Duration:{" "}
-                                {course.duration ||
-                                    "Not specified"}
-                            </span>
+    <span>
+        Duration: {course.duration || "Not specified"}
+    </span>
 
-                            <small>
-                                Course ID: {course.id}
-                            </small>
-                        </div>
+    <small>
+        Course ID: {course.id}
+    </small>
+<button
+    className="delete-course-btn"
+    onClick={() => setDeleteCourseId(course.id)}
+>
+    Delete Course
+</button>
+</div>
                     ))
                 )}
             </div>
@@ -238,6 +242,41 @@ function CoursePanel({
         ))
     )}
 </div>
+{deleteCourseId && (
+    <div className="delete-modal-overlay">
+        <div className="delete-modal">
+            <span className="delete-modal-label">
+                COURSE REMOVAL
+            </span>
+
+            <h3>Delete this course?</h3>
+
+            <p>
+                This action will permanently remove the course
+                and its enrollment records.
+            </p>
+
+            <div className="delete-modal-actions">
+                <button
+                    className="delete-confirm-btn"
+                    onClick={async () => {
+                        await deleteCourse(deleteCourseId);
+                        setDeleteCourseId(null);
+                    }}
+                >
+                    Delete
+                </button>
+
+                <button
+                    className="delete-cancel-btn"
+                    onClick={() => setDeleteCourseId(null)}
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+)}
         </>
     );
 }

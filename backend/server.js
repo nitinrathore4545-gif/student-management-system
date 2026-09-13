@@ -5,6 +5,7 @@ import studentRoutes from "./routes/studentRoutes.js"
 import courseRoutes from "./routes/courseRoutes.js"
 import enrollmentRoutes from "./routes/enrollmentRoutes.js"
 import marksRoutes from "./routes/marksRoutes.js"
+import authRoutes from "./routes/authRoutes.js"
 
 import pool from "./config/db.js"
 
@@ -18,6 +19,7 @@ app.use("/api/students",studentRoutes)
 app.use("/api/courses",courseRoutes)
 app.use("/api/enrollments",enrollmentRoutes)
 app.use("/api/marks",marksRoutes)
+app.use("/api/auth",authRoutes)
 
 app.get("/",(req,res)=>{
     res.json({

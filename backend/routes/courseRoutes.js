@@ -1,10 +1,36 @@
-import express from "express"
-import { addCourse,getCourses } from "../controllers/courseController.js"
+import express from "express";
 
-const router = express.Router()
+import {
+    addCourse,
+    getCourses,
+    deleteCourse
+} from "../controllers/courseController.js";
 
-router.post("/",addCourse)
+import {
+    protect,
+    teacherOnly
+} from "../middleware/authMiddleware.js";
 
-router.get("/",getCourses)
+const router = express.Router();
 
-export default router
+router.post(
+    "/",
+    protect,
+    teacherOnly,
+    addCourse
+);
+
+router.get(
+    "/",
+    protect,
+    getCourses
+);
+
+router.delete(
+    "/:id",
+    protect,
+    teacherOnly,
+    deleteCourse
+);
+
+export default router;

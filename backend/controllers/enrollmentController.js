@@ -27,6 +27,19 @@ export const enrollStudent = async(req,res)=>{
 
 export const getResult = async (req,res)=>{
     try{
+        if (req.user.role === "student") {
+    const [rows] = await pool.query(
+        "SELECT id FROM students WHERE email = ?",
+        [req.user.email]
+    );
+
+    if (rows.length === 0 || rows[0].id !== Number(req.params.id)) {
+        return res.status(403).json({
+            success: false,
+            message: "You can only view your own result"
+        });
+    }
+}
         const studentId = req.params.id
         const result = await getStudentResult(studentId)
         if(result.length===0){

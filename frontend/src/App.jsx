@@ -1,442 +1,906 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Canvas } from "@react-three/fiber";
-import CampusScene from "./scenes/Campusscene";
+
+import CampusScene from "./scenes/CampusScene";
 import StudentPanel from "./components/StudentPanel";
-import api from "./services/api";
 import CoursePanel from "./components/CoursePanel";
 import ResultPanel from "./components/ResultPanel";
-import "./App.css"
+
+import api from "./services/api";
+
+import {
+    Navigate,
+    useLocation,
+    useNavigate
+} from "react-router-dom";
+
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+
+import { AuthContext } from "./context/AuthContext.jsx";
+
+import "./App.css";
 
 function App() {
+
+    const {
+        user,
+        logout,
+        loading: authLoading
+    } = useContext(AuthContext);
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // =========================
+    // CAMPUS STATE
+    // =========================
+
     const [activeHub, setActiveHub] = useState(null);
-    const [students,setStudents] = useState([])
-    const [loading,setLoading] = useState(false)
 
-    const [showAddForm,setShowAddForm] = useState(false)
+    const [students, setStudents] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const [showAddForm, setShowAddForm] = useState(false);
+
     const [page, setPage] = useState(1);
-const limit = 5
-const [totalStudents, setTotalStudents] = useState(0);
-const [searchName, setSearchName] = useState("");
-const [editingStudent, setEditingStudent] = useState(null);
-const [showEditForm, setShowEditForm] = useState(false);
-const [courses, setCourses] = useState([]);
-const [courseLoading, setCourseLoading] = useState(false);
-const [showCourseForm, setShowCourseForm] = useState(false);
+    const limit = 5;
 
-const [courseFormData, setCourseFormData] = useState({
-    course_name: "",
-    duration: ""
-});
-const [selectedStudent, setSelectedStudent] = useState("");
-const [selectedCourse, setSelectedCourse] = useState("");
-const [showAssignForm, setShowAssignForm] = useState(false);
+    const [totalStudents, setTotalStudents] = useState(0);
 
-const [selectedResultStudent, setSelectedResultStudent] = useState("");
-const [studentResult, setStudentResult] = useState(null);
-const [resultLoading, setResultLoading] = useState(false);
+    const [searchName, setSearchName] = useState("");
 
-const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    age: "",
-    course: ""
-});
-const [showMarksForm, setShowMarksForm] = useState(false);
-const [marksData, setMarksData] = useState({
-    enrollment_id: "",
-    subject: "",
-    marks: "",
-    max_marks: 100
-});
-const [enrollments, setEnrollments] = useState([]);
+    const [editingStudent, setEditingStudent] = useState(null);
+    const [showEditForm, setShowEditForm] = useState(false);
 
+    const [courses, setCourses] = useState([]);
+    const [courseLoading, setCourseLoading] = useState(false);
 
-useEffect(() => {
-    if (activeHub === "Student Hub") {
-        loadStudents();
-    }
+    const [showCourseForm, setShowCourseForm] = useState(false);
 
-    if (activeHub === "Course Hub") {
-        loadCourses();
-        loadStudents();
-        loadEnrollments();
-    }
+    const [toast, setToast] = useState(null);
 
-    if (activeHub === "Result Hub") {
-        loadStudents();
-        loadEnrollments();
-    }
-}, [activeHub, page]);
+    const [deleteCourseId, setDeleteCourseId] = useState(null);
 
-const loadStudents = async () => {
-    try {
-        setLoading(true);
-    const response = await api.get(
-    `/students?page=${page}&limit=${limit}`
-);
+    const [courseFormData, setCourseFormData] = useState({
+        course_name: "",
+        duration: ""
+    });
 
+    const [selectedStudent, setSelectedStudent] = useState("");
+    const [selectedCourse, setSelectedCourse] = useState("");
 
-setStudents(response.data.data);
-setTotalStudents(response.data.count);
-      
+    const [showAssignForm, setShowAssignForm] = useState(false);
 
+    const [selectedResultStudent, setSelectedResultStudent] =
+        useState("");
 
-    } catch (error) {
-        console.error("Failed to fetch students:", error);
-    } finally {
-        setLoading(false);
-    }
-};
-const addMarks = async () => {
-    try {
-      await api.post(
-    "/marks",
-    marksData
-);
+    const [studentResult, setStudentResult] = useState(null);
 
-        alert("Marks added successfully!");
+    const [resultLoading, setResultLoading] = useState(false);
 
-        setMarksData({
-            enrollment_id: "",
-            subject: "",
-            marks: "",
-            max_marks: 100
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        age: "",
+        course: ""
+    });
+
+    const [showMarksForm, setShowMarksForm] = useState(false);
+
+    const [marksData, setMarksData] = useState({
+        enrollment_id: "",
+        subject: "",
+        marks: "",
+        max_marks: 100
+    });
+
+    const [enrollments, setEnrollments] = useState([]);
+
+    // =========================
+    // TOAST
+    // =========================
+
+    const showToast = (message, type = "success") => {
+
+        setToast({
+            message,
+            type
         });
 
-        setShowMarksForm(false);
+        setTimeout(() => {
+            setToast(null);
+        }, 3000);
+    };
 
-    } catch (error) {
-        console.error("Failed to add marks:", error);
+    // =========================
+    // LOAD STUDENTS
+    // =========================
 
-        alert(
-            error.response?.data?.message ||
-            "Failed to add marks"
-        );
-    }
-};
-const loadCourses = async () => {
-    try {
-        setCourseLoading(true);
+    useEffect(() => {
 
-      const response = await api.get(
-    "/courses"
-);
-
-
-        setCourses(response.data.data);
-
-    } catch (error) {
-        console.error("Failed to fetch courses:", error);
-    } finally {
-        setCourseLoading(false);
-    }
-};
-const addCourse = async () => {
-    try {
-        if (!courseFormData.course_name || !courseFormData.duration) {
-            alert("Please fill all fields");
-            return;
+        if (activeHub === "Student Hub") {
+            loadStudents();
         }
 
-        await api.post("/courses", courseFormData);
+    }, [activeHub, page]);
 
-        alert("Course added successfully!");
+    // =========================
+    // LOAD COURSE / RESULT DATA
+    // =========================
 
-        setCourseFormData({
-            course_name: "",
-            duration: ""
-        });
+    useEffect(() => {
 
-        setShowCourseForm(false);
+        if (activeHub === "Course Hub") {
 
-        loadCourses();
+            loadCourses();
+            loadStudents();
+            loadEnrollments();
 
-    } catch (error) {
-        console.error("Failed to add course:", error);
-
-        alert(
-            error.response?.data?.message ||
-            "Failed to add course"
-        );
-    }
-};
-const loadEnrollments = async () => {
-    try {
-      const response = await api.get(
-    "/enrollments"
-);
-        setEnrollments(response.data.data);
-
-    } catch (error) {
-        console.error("Failed to fetch enrollments:", error);
-    }
-};
-const assignCourse = async () => {
-    try {
-        if (!selectedStudent || !selectedCourse) {
-            alert("Please select student and course");
-            return;
-        }
-const response = await api.post(
-    "/enrollments",
-    {
-        student_id: selectedStudent,
-        course_id: selectedCourse
-    }
-);
-
-
-        alert("Course assigned successfully!");
-
-        setSelectedStudent("");
-        setSelectedCourse("");
-        setShowAssignForm(false);
-
-    } catch (error) {
-        console.error("Failed to assign course:", error);
-
-        alert(
-            error.response?.data?.message ||
-            "Failed to assign course"
-        );
-    }
-};
-const loadStudentResult = async () => {
-    try {
-        if (!selectedResultStudent) {
-            alert("Please select a student");
-            return;
         }
 
-        setResultLoading(true);
+        if (activeHub === "Result Hub") {
 
-      const response = await api.get(
-    `/enrollments/student/${selectedResultStudent}/result`
-);
+            loadStudents();
+            loadEnrollments();
 
-        setStudentResult(response.data);
+        }
 
-    } catch (error) {
-        console.error("Failed to fetch result:", error);
-        setStudentResult(null);
-    } finally {
-        setResultLoading(false);
+    }, [activeHub]);
+
+    // =========================
+    // LOAD STUDENTS
+    // =========================
+
+    const loadStudents = async () => {
+
+        try {
+
+            setLoading(true);
+
+            const response = await api.get(
+                `/students?page=${page}&limit=${limit}`
+            );
+
+            setStudents(response.data.data);
+            setTotalStudents(response.data.count);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to fetch students:",
+                error
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+    // =========================
+    // ADD MARKS
+    // =========================
+
+    const addMarks = async () => {
+
+        try {
+
+            await api.post(
+                "/marks",
+                marksData
+            );
+
+            showToast(
+                "Marks added successfully!"
+            );
+
+            setMarksData({
+                enrollment_id: "",
+                subject: "",
+                marks: "",
+                max_marks: 100
+            });
+
+            setShowMarksForm(false);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to add marks:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to add marks",
+                "error"
+            );
+        }
+    };
+
+    // =========================
+    // LOAD COURSES
+    // =========================
+
+    const loadCourses = async () => {
+
+        try {
+
+            setCourseLoading(true);
+
+            const response = await api.get(
+                "/courses"
+            );
+
+            setCourses(response.data.data);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to fetch courses:",
+                error
+            );
+
+        } finally {
+
+            setCourseLoading(false);
+
+        }
+    };
+
+    // =========================
+    // DELETE COURSE
+    // =========================
+
+    const deleteCourse = async (id) => {
+
+        try {
+
+            await api.delete(
+                `/courses/${id}`
+            );
+
+            showToast(
+                "Course deleted successfully!"
+            );
+
+            await loadCourses();
+            await loadEnrollments();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to delete course:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to delete course",
+                "error"
+            );
+        }
+    };
+
+    // =========================
+    // ADD COURSE
+    // =========================
+
+    const addCourse = async () => {
+
+        try {
+
+            if (
+                !courseFormData.course_name ||
+                !courseFormData.duration
+            ) {
+
+                showToast(
+                    "Please fill all fields",
+                    "error"
+                );
+
+                return;
+            }
+
+            await api.post(
+                "/courses",
+                courseFormData
+            );
+
+            showToast(
+                "Course added successfully!"
+            );
+
+            setCourseFormData({
+                course_name: "",
+                duration: ""
+            });
+
+            setShowCourseForm(false);
+
+            await loadCourses();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to add course:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to add course",
+                "error"
+            );
+        }
+    };
+
+    // =========================
+    // LOAD ENROLLMENTS
+    // =========================
+
+    const loadEnrollments = async () => {
+
+        try {
+
+            const response = await api.get(
+                "/enrollments"
+            );
+
+            setEnrollments(
+                response.data.data
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to fetch enrollments:",
+                error
+            );
+        }
+    };
+
+    // =========================
+    // ASSIGN COURSE
+    // =========================
+
+    const assignCourse = async () => {
+
+        try {
+
+            if (
+                !selectedStudent ||
+                !selectedCourse
+            ) {
+
+                showToast(
+                    "Please select a course and a student",
+                    "error"
+                );
+
+                return;
+            }
+
+            await api.post(
+                "/enrollments",
+                {
+                    student_id: selectedStudent,
+                    course_id: selectedCourse
+                }
+            );
+
+            await loadEnrollments();
+
+            showToast(
+                "Course assigned successfully!"
+            );
+
+            setSelectedStudent("");
+            setSelectedCourse("");
+            setShowAssignForm(false);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to assign course:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to assign course",
+                "error"
+            );
+        }
+    };
+
+    // =========================
+    // LOAD RESULT
+    // =========================
+
+    const loadStudentResult = async () => {
+
+        try {
+
+            if (!selectedResultStudent) {
+
+                showToast(
+                    "Please select a student",
+                    "error"
+                );
+
+                return;
+            }
+
+            setResultLoading(true);
+
+            const response = await api.get(
+                `/enrollments/student/${selectedResultStudent}/result`
+            );
+
+            setStudentResult(
+                response.data
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to fetch result:",
+                error
+            );
+
+            setStudentResult(null);
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to load result",
+                "error"
+            );
+
+        } finally {
+
+            setResultLoading(false);
+
+        }
+    };
+
+    // =========================
+    // ADD STUDENT
+    // =========================
+
+    const addStudent = async () => {
+
+        try {
+
+            await api.post(
+                "/students",
+                formData
+            );
+
+            showToast(
+                "Student added successfully!"
+            );
+
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                age: "",
+                course: ""
+            });
+
+            setShowAddForm(false);
+
+            await loadStudents();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to add student:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to add student",
+                "error"
+            );
+        }
+    };
+
+    // =========================
+    // SEARCH STUDENTS
+    // =========================
+
+    const searchStudents = async () => {
+
+        try {
+
+            if (!searchName.trim()) {
+
+                await loadStudents();
+
+                return;
+            }
+
+            setPage(1);
+            setLoading(true);
+
+            const response = await api.get(
+                `/students/search/${searchName}`
+            );
+
+            setStudents(
+                response.data.data
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Search failed:",
+                error
+            );
+
+            setStudents([]);
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+    // =========================
+    // DELETE STUDENT
+    // =========================
+
+    const deleteStudent = async (id) => {
+
+        try {
+
+            await api.delete(
+                `/students/${id}`
+            );
+
+            showToast(
+                "Student deleted successfully!"
+            );
+
+            await loadStudents();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to delete student:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to delete student",
+                "error"
+            );
+        }
+    };
+
+    // =========================
+    // UPDATE STUDENT
+    // =========================
+
+    const updateStudent = async () => {
+
+        try {
+
+            await api.put(
+                `/students/${editingStudent.id}`,
+                formData
+            );
+
+            showToast(
+                "Student updated successfully!"
+            );
+
+            setShowEditForm(false);
+            setEditingStudent(null);
+
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                age: "",
+                course: ""
+            });
+
+            await loadStudents();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to update student:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to update student",
+                "error"
+            );
+        }
+    };
+
+    // =========================================================
+    // IMPORTANT:
+    // AUTH CHECK YAHAN HAI — SAARE HOOKS KE BAAD
+    // =========================================================
+
+    if (authLoading) {
+
+        return (
+            <div className="auth-loading">
+                Loading...
+            </div>
+        );
     }
-};
-const addStudent = async () => {
-    try {
-      const response = await api.post(
-    "/students",
-    formData
-);
 
+    if (location.pathname === "/login") {
 
-        setFormData({
-            name: "",
-            email: "",
-            phone: "",
-            age: "",
-            course: ""
-        });
+        if (user) {
 
-        setShowAddForm(false);
+            return (
+                <Navigate
+                    to="/campus"
+                    replace
+                />
+            );
+        }
 
-        loadStudents();
-
-    } catch (error) {
-        console.error("Failed to add student:", error);
+        return <Login />;
     }
-};
-const searchStudents = async () => {
-    try {
-        setPage(1);
 
-        setLoading(true);
+    if (location.pathname === "/register") {
 
-      const response = await api.get(
-    `/students/search/${searchName}`
-);
-     
+        if (user) {
 
-        setStudents(response.data.data);
+            return (
+                <Navigate
+                    to="/campus"
+                    replace
+                />
+            );
+        }
 
-    } catch (error) {
-        console.error("Search failed:", error);
-        setStudents([]);
-    } finally {
-        setLoading(false);
+        return <Register />;
     }
-};
-const deleteStudent = async (id) => {
-    try {
-      await api.delete(
-    `/students/${id}`
-);
 
+    if (!user) {
 
-        loadStudents();
-
-    } catch (error) {
-        console.error("Failed to delete student:", error);
+        return (
+            <Navigate
+                to="/login"
+                replace
+            />
+        );
     }
-};
-const updateStudent = async () => {
-    try {
-      await api.put(
-    `/students/${editingStudent.id}`,
-    formData
-);
 
+    // =========================
+    // LOGOUT
+    // =========================
 
-        setShowEditForm(false);
-        setEditingStudent(null);
+    const handleLogout = () => {
 
-        setFormData({
-            name: "",
-            email: "",
-            phone: "",
-            age: "",
-            course: ""
-        });
+        logout();
 
-        loadStudents();
+        setActiveHub(null);
 
-    } catch (error) {
-        console.error("Failed to update student:", error);
-    }
-};
+        navigate(
+            "/login",
+            {
+                replace: true
+            }
+        );
+    };
+
+    // =========================
+    // CAMPUS UI
+    // =========================
 
     return (
+
         <div className="app">
+
+            {toast && (
+
+                <div
+                    className={`toast toast-${toast.type}`}
+                >
+
+                    <span className="toast-dot"></span>
+
+                    <div>
+
+                        <strong>
+                            {toast.type === "success"
+                                ? "Success"
+                                : "Error"}
+                        </strong>
+
+                        <p>
+                            {toast.message}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            )}
+
             <div className="system-hud">
-    <div className="system-status">
-        <span className="status-dot"></span>
-        SYSTEM ONLINE
-    </div>
 
-    <div className="system-title">
-        STUDENT MANAGEMENT SYSTEM
-    </div>
+                <div className="system-status">
 
-    <div className="system-location">
-        CAMPUS // {activeHub ? activeHub.toUpperCase() : "MAIN"}
-    </div>
-</div>
+                    <span className="status-dot"></span>
 
-         <Canvas
-    shadows
-    camera={{
-        position: [12, 10, 15],
-        fov: 45
-    }}
-    style={{
-        width: "100vw",
-        height: "100vh"
-    }}
->
-            <CampusScene 
-    activeHub={activeHub}
-    setActiveHub={setActiveHub}
-/>
+                    SYSTEM ONLINE
+
+                </div>
+
+                <div className="system-title">
+                    STUDENT MANAGEMENT SYSTEM
+                </div>
+
+                <div className="system-location">
+
+                    CAMPUS //{" "}
+
+                    {activeHub
+                        ? activeHub.toUpperCase()
+                        : "MAIN"}
+
+                </div>
+
+                <div className="user-info">
+
+                    <span>
+                        {user?.name}
+                    </span>
+
+                    <span className="user-role">
+                        {user?.role?.toUpperCase()}
+                    </span>
+
+                    <button
+                        type="button"
+                        className="logout-btn"
+                        onClick={handleLogout}
+                    >
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+            <Canvas
+                shadows
+                camera={{
+                    position: [12, 10, 15],
+                    fov: 45
+                }}
+                style={{
+                    width: "100vw",
+                    height: "100vh",
+                    display: "block"
+                }}
+            >
+
+                <CampusScene
+                    activeHub={activeHub}
+                    setActiveHub={setActiveHub}
+                />
+
             </Canvas>
 
             {activeHub && (
+
                 <div className="hub-panel">
 
                     <button
                         className="close-btn"
-                        onClick={() => setActiveHub(null)}
+                        onClick={() =>
+                            setActiveHub(null)
+                        }
                     >
                         ×
                     </button>
 
-                    <h1>{activeHub}</h1>
+                    <h1>
+                        {activeHub}
+                    </h1>
 
                     <p>
-                        Manage your {activeHub.toLowerCase()}
+                        Manage your{" "}
+                        {activeHub.toLowerCase()}
                     </p>
-{/* Student Hub */}
-{activeHub === "Student Hub" && (
-    <StudentPanel
-        
-        searchName={searchName}
-        setSearchName={setSearchName}
-        searchStudents={searchStudents}
-        setPage={setPage}
-        loadStudents={loadStudents}
 
-        page={page}
-        totalStudents={totalStudents}
-        limit={limit}
+                    {activeHub === "Student Hub" && (
 
-        showEditForm={showEditForm}
-        setShowEditForm={setShowEditForm}
-        setEditingStudent={setEditingStudent}
-        formData={formData}
-        setFormData={setFormData}
-        updateStudent={updateStudent}
+                        <StudentPanel
+                            searchName={searchName}
+                            setSearchName={setSearchName}
+                            searchStudents={searchStudents}
+                            setPage={setPage}
+                            loadStudents={loadStudents}
+                            page={page}
+                            totalStudents={totalStudents}
+                            limit={limit}
+                            showEditForm={showEditForm}
+                            setShowEditForm={setShowEditForm}
+                            setEditingStudent={setEditingStudent}
+                            formData={formData}
+                            setFormData={setFormData}
+                            updateStudent={updateStudent}
+                            showAddForm={showAddForm}
+                            setShowAddForm={setShowAddForm}
+                            addStudent={addStudent}
+                            loading={loading}
+                            students={students}
+                            deleteStudent={deleteStudent}
+                        />
 
-        showAddForm={showAddForm}
-        setShowAddForm={setShowAddForm}
-        addStudent={addStudent}
+                    )}
 
-        loading={loading}
-        students={students}
-        deleteStudent={deleteStudent}
-    />
-)}
+                    {activeHub === "Course Hub" && (
 
-{/* Course Hub */}
-{activeHub === "Course Hub" && (
-    <CoursePanel
-        courses={courses}
-        courseLoading={courseLoading}
-        students={students}
-        enrollments={enrollments}
+                        <CoursePanel
+                            courses={courses}
+                            courseLoading={courseLoading}
+                            students={students}
+                            enrollments={enrollments}
+                            selectedStudent={selectedStudent}
+                            setSelectedStudent={setSelectedStudent}
+                            selectedCourse={selectedCourse}
+                            setSelectedCourse={setSelectedCourse}
+                            showAssignForm={showAssignForm}
+                            setShowAssignForm={setShowAssignForm}
+                            assignCourse={assignCourse}
+                            showCourseForm={showCourseForm}
+                            setShowCourseForm={setShowCourseForm}
+                            courseFormData={courseFormData}
+                            setCourseFormData={setCourseFormData}
+                            addCourse={addCourse}
+                            deleteCourse={deleteCourse}
+                            deleteCourseId={deleteCourseId}
+                            setDeleteCourseId={setDeleteCourseId}
+                        />
 
-        selectedStudent={selectedStudent}
-        setSelectedStudent={setSelectedStudent}
+                    )}
 
-        selectedCourse={selectedCourse}
-        setSelectedCourse={setSelectedCourse}
+                    {activeHub === "Result Hub" && (
 
-        showAssignForm={showAssignForm}
-        setShowAssignForm={setShowAssignForm}
+                        <ResultPanel
+                            showMarksForm={showMarksForm}
+                            setShowMarksForm={setShowMarksForm}
+                            marksData={marksData}
+                            setMarksData={setMarksData}
+                            addMarks={addMarks}
+                            enrollments={enrollments}
+                            students={students}
+                            selectedResultStudent={selectedResultStudent}
+                            setSelectedResultStudent={setSelectedResultStudent}
+                            loadStudentResult={loadStudentResult}
+                            resultLoading={resultLoading}
+                            studentResult={studentResult}
+                            setStudentResult={setStudentResult}
+                        />
 
-        assignCourse={assignCourse}
-        showCourseForm={showCourseForm}
-setShowCourseForm={setShowCourseForm}
+                    )}
 
-courseFormData={courseFormData}
-setCourseFormData={setCourseFormData}
-
-addCourse={addCourse}
-    />
-)}
- {/* Result Hub */}
-{activeHub === "Result Hub" && (
-    <ResultPanel
-        showMarksForm={showMarksForm}
-        setShowMarksForm={setShowMarksForm}
-
-        marksData={marksData}
-        setMarksData={setMarksData}
-        addMarks={addMarks}
-
-        enrollments={enrollments}
-
-        students={students}
-        selectedResultStudent={selectedResultStudent}
-        setSelectedResultStudent={setSelectedResultStudent}
-        loadStudentResult={loadStudentResult}
-
-        resultLoading={resultLoading}
-        studentResult={studentResult}
-        setStudentResult={setStudentResult}
-    />
-)}
                 </div>
+
             )}
 
         </div>

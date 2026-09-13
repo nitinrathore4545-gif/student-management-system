@@ -217,3 +217,123 @@
 .hub-panel::-webkit-scrollbar-thumb:hover {
     background: #46515c;
 }
+/* ============================= */
+/* Toast Notification */
+/* ============================= */
+
+.toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+
+    min-width: 280px;
+    max-width: 360px;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    padding: 14px 16px;
+
+    background: #11161c;
+    border: 1px solid #303944;
+    border-radius: 10px;
+
+    color: #f1f5f9;
+
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+
+    z-index: 9999;
+
+    animation: toastIn 0.3s ease-out;
+}
+
+.toast-dot {
+    width: 8px;
+    height: 8px;
+
+    margin-top: 5px;
+
+    border-radius: 50%;
+    background: #4ade80;
+
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+}
+
+.toast strong {
+    display: block;
+
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+.toast p {
+    margin: 0;
+
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.toast-error {
+    border-color: #6b3030;
+}
+
+.toast-error .toast-dot {
+    background: #f87171;
+
+    box-shadow: 0 0 10px rgba(248, 113, 113, 0.5);
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+.user-role {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #60a5fa;
+    padding: 4px 7px;
+    border: 1px solid #263d57;
+    border-radius: 5px;
+}
+
+.logout-btn {
+    padding: 7px 13px;
+    background: #111820;
+    color: #f87171;
+    border: 1px solid #3b2528;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.logout-btn:hover {
+    background: #1b1214;
+    border-color: #713535;
+}
+
+.auth-loading {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #05070a;
+    color: #cbd5e1;
+}
