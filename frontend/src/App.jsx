@@ -21,7 +21,12 @@ import { AuthContext } from "./context/AuthContext.jsx";
 
 import "./App.css";
 
+
 function App() {
+
+    // =========================
+    // AUTH
+    // =========================
 
     const {
         user,
@@ -31,6 +36,15 @@ function App() {
 
     const location = useLocation();
     const navigate = useNavigate();
+
+
+    // =========================
+    // ROLE
+    // =========================
+
+    const isTeacher = user?.role === "teacher";
+    const isStudent = user?.role === "student";
+
 
     // =========================
     // CAMPUS STATE
@@ -53,12 +67,15 @@ function App() {
     const [editingStudent, setEditingStudent] = useState(null);
     const [showEditForm, setShowEditForm] = useState(false);
 
+
+    // =========================
+    // COURSE STATE
+    // =========================
+
     const [courses, setCourses] = useState([]);
     const [courseLoading, setCourseLoading] = useState(false);
 
     const [showCourseForm, setShowCourseForm] = useState(false);
-
-    const [toast, setToast] = useState(null);
 
     const [deleteCourseId, setDeleteCourseId] = useState(null);
 
@@ -67,10 +84,22 @@ function App() {
         duration: ""
     });
 
+
+    // =========================
+    // ENROLLMENT STATE
+    // =========================
+
     const [selectedStudent, setSelectedStudent] = useState("");
     const [selectedCourse, setSelectedCourse] = useState("");
 
     const [showAssignForm, setShowAssignForm] = useState(false);
+
+    const [enrollments, setEnrollments] = useState([]);
+
+
+    // =========================
+    // RESULT STATE
+    // =========================
 
     const [selectedResultStudent, setSelectedResultStudent] =
         useState("");
@@ -79,13 +108,10 @@ function App() {
 
     const [resultLoading, setResultLoading] = useState(false);
 
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        phone: "",
-        age: "",
-        course: ""
-    });
+
+    // =========================
+    // MARKS STATE
+    // =========================
 
     const [showMarksForm, setShowMarksForm] = useState(false);
 
@@ -96,11 +122,25 @@ function App() {
         max_marks: 100
     });
 
-    const [enrollments, setEnrollments] = useState([]);
+
+    // =========================
+    // STUDENT FORM
+    // =========================
+
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        age: "",
+        course: ""
+    });
+
 
     // =========================
     // TOAST
     // =========================
+
+    const [toast, setToast] = useState(null);
 
     const showToast = (message, type = "success") => {
 
@@ -114,17 +154,22 @@ function App() {
         }, 3000);
     };
 
+
     // =========================
     // LOAD STUDENTS
     // =========================
 
     useEffect(() => {
 
-        if (activeHub === "Student Hub") {
+        if (
+            isTeacher &&
+            activeHub === "Student Hub"
+        ) {
             loadStudents();
         }
 
-    }, [activeHub, page]);
+    }, [activeHub, page, isTeacher]);
+
 
     // =========================
     // LOAD COURSE / RESULT DATA
@@ -132,7 +177,10 @@ function App() {
 
     useEffect(() => {
 
-        if (activeHub === "Course Hub") {
+        if (
+            isTeacher &&
+            activeHub === "Course Hub"
+        ) {
 
             loadCourses();
             loadStudents();
@@ -140,14 +188,18 @@ function App() {
 
         }
 
-        if (activeHub === "Result Hub") {
+        if (
+            isTeacher &&
+            activeHub === "Result Hub"
+        ) {
 
             loadStudents();
             loadEnrollments();
 
         }
 
-    }, [activeHub]);
+    }, [activeHub, isTeacher]);
+
 
     // =========================
     // LOAD STUDENTS
@@ -173,6 +225,12 @@ function App() {
                 error
             );
 
+            showToast(
+                error.response?.data?.message ||
+                "Failed to fetch students",
+                "error"
+            );
+
         } finally {
 
             setLoading(false);
@@ -180,46 +238,6 @@ function App() {
         }
     };
 
-    // =========================
-    // ADD MARKS
-    // =========================
-
-    const addMarks = async () => {
-
-        try {
-
-            await api.post(
-                "/marks",
-                marksData
-            );
-
-            showToast(
-                "Marks added successfully!"
-            );
-
-            setMarksData({
-                enrollment_id: "",
-                subject: "",
-                marks: "",
-                max_marks: 100
-            });
-
-            setShowMarksForm(false);
-
-        } catch (error) {
-
-            console.error(
-                "Failed to add marks:",
-                error
-            );
-
-            showToast(
-                error.response?.data?.message ||
-                "Failed to add marks",
-                "error"
-            );
-        }
-    };
 
     // =========================
     // LOAD COURSES
@@ -244,6 +262,12 @@ function App() {
                 error
             );
 
+            showToast(
+                error.response?.data?.message ||
+                "Failed to fetch courses",
+                "error"
+            );
+
         } finally {
 
             setCourseLoading(false);
@@ -251,39 +275,201 @@ function App() {
         }
     };
 
+
     // =========================
-    // DELETE COURSE
+    // LOAD ENROLLMENTS
     // =========================
 
-    const deleteCourse = async (id) => {
+    const loadEnrollments = async () => {
 
         try {
 
-            await api.delete(
-                `/courses/${id}`
+            const response = await api.get(
+                "/enrollments"
             );
 
-            showToast(
-                "Course deleted successfully!"
+            setEnrollments(
+                response.data.data
             );
-
-            await loadCourses();
-            await loadEnrollments();
 
         } catch (error) {
 
             console.error(
-                "Failed to delete course:",
+                "Failed to fetch enrollments:",
+                error
+            );
+
+        }
+    };
+
+
+    // =========================
+    // ADD STUDENT
+    // =========================
+
+    const addStudent = async () => {
+
+        try {
+
+            await api.post(
+                "/students",
+                formData
+            );
+
+            showToast(
+                "Student added successfully!"
+            );
+
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                age: "",
+                course: ""
+            });
+
+            setShowAddForm(false);
+
+            await loadStudents();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to add student:",
                 error
             );
 
             showToast(
                 error.response?.data?.message ||
-                "Failed to delete course",
+                "Failed to add student",
                 "error"
             );
         }
     };
+
+
+    // =========================
+    // UPDATE STUDENT
+    // =========================
+
+    const updateStudent = async () => {
+
+        try {
+
+            await api.put(
+                `/students/${editingStudent.id}`,
+                formData
+            );
+
+            showToast(
+                "Student updated successfully!"
+            );
+
+            setShowEditForm(false);
+            setEditingStudent(null);
+
+            setFormData({
+                name: "",
+                email: "",
+                phone: "",
+                age: "",
+                course: ""
+            });
+
+            await loadStudents();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to update student:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to update student",
+                "error"
+            );
+        }
+    };
+
+
+    // =========================
+    // DELETE STUDENT
+    // =========================
+
+    const deleteStudent = async (id) => {
+
+        try {
+
+            await api.delete(
+                `/students/${id}`
+            );
+
+            showToast(
+                "Student deleted successfully!"
+            );
+
+            await loadStudents();
+
+        } catch (error) {
+
+            console.error(
+                "Failed to delete student:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to delete student",
+                "error"
+            );
+        }
+    };
+
+
+    // =========================
+    // SEARCH STUDENTS
+    // =========================
+
+    const searchStudents = async () => {
+
+        try {
+
+            if (!searchName.trim()) {
+
+                await loadStudents();
+
+                return;
+            }
+
+            setPage(1);
+            setLoading(true);
+
+            const response = await api.get(
+                `/students/search/${searchName}`
+            );
+
+            setStudents(
+                response.data.data
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Search failed:",
+                error
+            );
+
+            setStudents([]);
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
 
     // =========================
     // ADD COURSE
@@ -339,30 +525,41 @@ function App() {
         }
     };
 
+
     // =========================
-    // LOAD ENROLLMENTS
+    // DELETE COURSE
     // =========================
 
-    const loadEnrollments = async () => {
+    const deleteCourse = async (id) => {
 
         try {
 
-            const response = await api.get(
-                "/enrollments"
+            await api.delete(
+                `/courses/${id}`
             );
 
-            setEnrollments(
-                response.data.data
+            showToast(
+                "Course deleted successfully!"
             );
+
+            await loadCourses();
+            await loadEnrollments();
 
         } catch (error) {
 
             console.error(
-                "Failed to fetch enrollments:",
+                "Failed to delete course:",
                 error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to delete course",
+                "error"
             );
         }
     };
+
 
     // =========================
     // ASSIGN COURSE
@@ -418,13 +615,83 @@ function App() {
         }
     };
 
+
+    // =========================
+    // ADD MARKS
+    // =========================
+
+    const addMarks = async () => {
+
+        try {
+
+            await api.post(
+                "/marks",
+                marksData
+            );
+
+            showToast(
+                "Marks added successfully!"
+            );
+
+            setMarksData({
+                enrollment_id: "",
+                subject: "",
+                marks: "",
+                max_marks: 100
+            });
+
+            setShowMarksForm(false);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to add marks:",
+                error
+            );
+
+            showToast(
+                error.response?.data?.message ||
+                "Failed to add marks",
+                "error"
+            );
+        }
+    };
+
+
     // =========================
     // LOAD RESULT
     // =========================
 
     const loadStudentResult = async () => {
 
-        try {
+    try {
+
+        setResultLoading(true);
+
+
+        // =========================
+        // STUDENT
+        // =========================
+
+        if (isStudent) {
+
+            const response = await api.get(
+                "/enrollments/my-result"
+            );
+
+            setStudentResult(
+                response.data
+            );
+
+            return;
+        }
+
+
+        // =========================
+        // TEACHER
+        // =========================
+
+        if (isTeacher) {
 
             if (!selectedResultStudent) {
 
@@ -436,8 +703,6 @@ function App() {
                 return;
             }
 
-            setResultLoading(true);
-
             const response = await api.get(
                 `/enrollments/student/${selectedResultStudent}/result`
             );
@@ -445,197 +710,33 @@ function App() {
             setStudentResult(
                 response.data
             );
-
-        } catch (error) {
-
-            console.error(
-                "Failed to fetch result:",
-                error
-            );
-
-            setStudentResult(null);
-
-            showToast(
-                error.response?.data?.message ||
-                "Failed to load result",
-                "error"
-            );
-
-        } finally {
-
-            setResultLoading(false);
-
         }
-    };
+
+    } catch (error) {
+
+        console.error(
+            "Failed to fetch result:",
+            error
+        );
+
+        setStudentResult(null);
+
+        showToast(
+            error.response?.data?.message ||
+            "Failed to load result",
+            "error"
+        );
+
+    } finally {
+
+        setResultLoading(false);
+
+    }
+};
 
     // =========================
-    // ADD STUDENT
+    // AUTH CHECK
     // =========================
-
-    const addStudent = async () => {
-
-        try {
-
-            await api.post(
-                "/students",
-                formData
-            );
-
-            showToast(
-                "Student added successfully!"
-            );
-
-            setFormData({
-                name: "",
-                email: "",
-                phone: "",
-                age: "",
-                course: ""
-            });
-
-            setShowAddForm(false);
-
-            await loadStudents();
-
-        } catch (error) {
-
-            console.error(
-                "Failed to add student:",
-                error
-            );
-
-            showToast(
-                error.response?.data?.message ||
-                "Failed to add student",
-                "error"
-            );
-        }
-    };
-
-    // =========================
-    // SEARCH STUDENTS
-    // =========================
-
-    const searchStudents = async () => {
-
-        try {
-
-            if (!searchName.trim()) {
-
-                await loadStudents();
-
-                return;
-            }
-
-            setPage(1);
-            setLoading(true);
-
-            const response = await api.get(
-                `/students/search/${searchName}`
-            );
-
-            setStudents(
-                response.data.data
-            );
-
-        } catch (error) {
-
-            console.error(
-                "Search failed:",
-                error
-            );
-
-            setStudents([]);
-
-        } finally {
-
-            setLoading(false);
-
-        }
-    };
-
-    // =========================
-    // DELETE STUDENT
-    // =========================
-
-    const deleteStudent = async (id) => {
-
-        try {
-
-            await api.delete(
-                `/students/${id}`
-            );
-
-            showToast(
-                "Student deleted successfully!"
-            );
-
-            await loadStudents();
-
-        } catch (error) {
-
-            console.error(
-                "Failed to delete student:",
-                error
-            );
-
-            showToast(
-                error.response?.data?.message ||
-                "Failed to delete student",
-                "error"
-            );
-        }
-    };
-
-    // =========================
-    // UPDATE STUDENT
-    // =========================
-
-    const updateStudent = async () => {
-
-        try {
-
-            await api.put(
-                `/students/${editingStudent.id}`,
-                formData
-            );
-
-            showToast(
-                "Student updated successfully!"
-            );
-
-            setShowEditForm(false);
-            setEditingStudent(null);
-
-            setFormData({
-                name: "",
-                email: "",
-                phone: "",
-                age: "",
-                course: ""
-            });
-
-            await loadStudents();
-
-        } catch (error) {
-
-            console.error(
-                "Failed to update student:",
-                error
-            );
-
-            showToast(
-                error.response?.data?.message ||
-                "Failed to update student",
-                "error"
-            );
-        }
-    };
-
-    // =========================================================
-    // IMPORTANT:
-    // AUTH CHECK YAHAN HAI — SAARE HOOKS KE BAAD
-    // =========================================================
 
     if (authLoading) {
 
@@ -645,6 +746,11 @@ function App() {
             </div>
         );
     }
+
+
+    // =========================
+    // LOGIN
+    // =========================
 
     if (location.pathname === "/login") {
 
@@ -661,6 +767,11 @@ function App() {
         return <Login />;
     }
 
+
+    // =========================
+    // REGISTER
+    // =========================
+
     if (location.pathname === "/register") {
 
         if (user) {
@@ -676,6 +787,11 @@ function App() {
         return <Register />;
     }
 
+
+    // =========================
+    // PROTECTED CAMPUS
+    // =========================
+
     if (!user) {
 
         return (
@@ -686,23 +802,37 @@ function App() {
         );
     }
 
+
     // =========================
     // LOGOUT
     // =========================
 
-    const handleLogout = () => {
+ const handleLogout = () => {
+    logout();
+    setActiveHub(null);
+    window.location.replace("/login");
+};
 
-        logout();
+    // =========================
+    // HUB ACCESS
+    // =========================
 
-        setActiveHub(null);
+    const handleHubClick = (hub) => {
 
-        navigate(
-            "/login",
-            {
-                replace: true
-            }
-        );
+        // Students are only allowed to access Result Hub
+        if (isStudent && hub !== "Result Hub") {
+
+            showToast(
+                "This section is available only to teachers.",
+                "error"
+            );
+
+            return;
+        }
+
+        setActiveHub(hub);
     };
+
 
     // =========================
     // CAMPUS UI
@@ -711,6 +841,8 @@ function App() {
     return (
 
         <div className="app">
+
+            {/* TOAST */}
 
             {toast && (
 
@@ -738,6 +870,9 @@ function App() {
 
             )}
 
+
+            {/* HUD */}
+
             <div className="system-hud">
 
                 <div className="system-status">
@@ -748,9 +883,13 @@ function App() {
 
                 </div>
 
+
                 <div className="system-title">
+
                     STUDENT MANAGEMENT SYSTEM
+
                 </div>
+
 
                 <div className="system-location">
 
@@ -762,6 +901,7 @@ function App() {
 
                 </div>
 
+
                 <div className="user-info">
 
                     <span>
@@ -769,20 +909,28 @@ function App() {
                     </span>
 
                     <span className="user-role">
+
                         {user?.role?.toUpperCase()}
+
                     </span>
+
 
                     <button
                         type="button"
                         className="logout-btn"
                         onClick={handleLogout}
                     >
+
                         Logout
+
                     </button>
 
                 </div>
 
             </div>
+
+
+            {/* 3D CAMPUS */}
 
             <Canvas
                 shadows
@@ -799,10 +947,13 @@ function App() {
 
                 <CampusScene
                     activeHub={activeHub}
-                    setActiveHub={setActiveHub}
+                    setActiveHub={handleHubClick}
                 />
 
             </Canvas>
+
+
+            {/* HUB PANEL */}
 
             {activeHub && (
 
@@ -817,84 +968,229 @@ function App() {
                         ×
                     </button>
 
+
                     <h1>
                         {activeHub}
                     </h1>
+
 
                     <p>
                         Manage your{" "}
                         {activeHub.toLowerCase()}
                     </p>
 
-                    {activeHub === "Student Hub" && (
 
-                        <StudentPanel
-                            searchName={searchName}
-                            setSearchName={setSearchName}
-                            searchStudents={searchStudents}
-                            setPage={setPage}
-                            loadStudents={loadStudents}
-                            page={page}
-                            totalStudents={totalStudents}
-                            limit={limit}
-                            showEditForm={showEditForm}
-                            setShowEditForm={setShowEditForm}
-                            setEditingStudent={setEditingStudent}
-                            formData={formData}
-                            setFormData={setFormData}
-                            updateStudent={updateStudent}
-                            showAddForm={showAddForm}
-                            setShowAddForm={setShowAddForm}
-                            addStudent={addStudent}
-                            loading={loading}
-                            students={students}
-                            deleteStudent={deleteStudent}
-                        />
+                    {/* =========================
+                        TEACHER — STUDENT HUB
+                    ========================= */}
 
-                    )}
+                    {activeHub === "Student Hub" &&
+                        isTeacher && (
 
-                    {activeHub === "Course Hub" && (
+                            <StudentPanel
+                                searchName={searchName}
+                                setSearchName={setSearchName}
+                                searchStudents={searchStudents}
+                                setPage={setPage}
+                                loadStudents={loadStudents}
+                                page={page}
+                                totalStudents={totalStudents}
+                                limit={limit}
 
-                        <CoursePanel
-                            courses={courses}
-                            courseLoading={courseLoading}
-                            students={students}
-                            enrollments={enrollments}
-                            selectedStudent={selectedStudent}
-                            setSelectedStudent={setSelectedStudent}
-                            selectedCourse={selectedCourse}
-                            setSelectedCourse={setSelectedCourse}
-                            showAssignForm={showAssignForm}
-                            setShowAssignForm={setShowAssignForm}
-                            assignCourse={assignCourse}
-                            showCourseForm={showCourseForm}
-                            setShowCourseForm={setShowCourseForm}
-                            courseFormData={courseFormData}
-                            setCourseFormData={setCourseFormData}
-                            addCourse={addCourse}
-                            deleteCourse={deleteCourse}
-                            deleteCourseId={deleteCourseId}
-                            setDeleteCourseId={setDeleteCourseId}
-                        />
+                                showEditForm={
+                                    showEditForm
+                                }
 
-                    )}
+                                setShowEditForm={
+                                    setShowEditForm
+                                }
+
+                                setEditingStudent={
+                                    setEditingStudent
+                                }
+
+                                formData={formData}
+                                setFormData={
+                                    setFormData
+                                }
+
+                                updateStudent={
+                                    updateStudent
+                                }
+
+                                showAddForm={
+                                    showAddForm
+                                }
+
+                                setShowAddForm={
+                                    setShowAddForm
+                                }
+
+                                addStudent={
+                                    addStudent
+                                }
+
+                                loading={loading}
+
+                                students={
+                                    students
+                                }
+
+                                deleteStudent={
+                                    deleteStudent
+                                }
+                            />
+
+                        )}
+
+
+                    {/* =========================
+                        TEACHER — COURSE HUB
+                    ========================= */}
+
+                    {activeHub === "Course Hub" &&
+                        isTeacher && (
+
+                            <CoursePanel
+                                courses={courses}
+                                courseLoading={
+                                    courseLoading
+                                }
+
+                                students={students}
+
+                                enrollments={
+                                    enrollments
+                                }
+
+                                selectedStudent={
+                                    selectedStudent
+                                }
+
+                                setSelectedStudent={
+                                    setSelectedStudent
+                                }
+
+                                selectedCourse={
+                                    selectedCourse
+                                }
+
+                                setSelectedCourse={
+                                    setSelectedCourse
+                                }
+
+                                showAssignForm={
+                                    showAssignForm
+                                }
+
+                                setShowAssignForm={
+                                    setShowAssignForm
+                                }
+
+                                assignCourse={
+                                    assignCourse
+                                }
+
+                                showCourseForm={
+                                    showCourseForm
+                                }
+
+                                setShowCourseForm={
+                                    setShowCourseForm
+                                }
+
+                                courseFormData={
+                                    courseFormData
+                                }
+
+                                setCourseFormData={
+                                    setCourseFormData
+                                }
+
+                                addCourse={
+                                    addCourse
+                                }
+
+                                deleteCourse={
+                                    deleteCourse
+                                }
+
+                                deleteCourseId={
+                                    deleteCourseId
+                                }
+
+                                setDeleteCourseId={
+                                    setDeleteCourseId
+                                }
+                            />
+
+                        )}
+
+
+                    {/* =========================
+                        RESULT HUB
+                    ========================= */}
 
                     {activeHub === "Result Hub" && (
 
                         <ResultPanel
-                            showMarksForm={showMarksForm}
-                            setShowMarksForm={setShowMarksForm}
-                            marksData={marksData}
-                            setMarksData={setMarksData}
-                            addMarks={addMarks}
-                            enrollments={enrollments}
-                            students={students}
-                            selectedResultStudent={selectedResultStudent}
-                            setSelectedResultStudent={setSelectedResultStudent}
-                            loadStudentResult={loadStudentResult}
-                            resultLoading={resultLoading}
-                            studentResult={studentResult}
-                            setStudentResult={setStudentResult}
+                            showMarksForm={
+                                isTeacher
+                                    ? showMarksForm
+                                    : false
+                            }
+
+                            setShowMarksForm={
+                                setShowMarksForm
+                            }
+
+                            marksData={
+                                marksData
+                            }
+
+                            setMarksData={
+                                setMarksData
+                            }
+
+                            addMarks={
+                                addMarks
+                            }
+
+                            enrollments={
+                                enrollments
+                            }
+
+                            students={
+                                students
+                            }
+
+                            selectedResultStudent={
+                                selectedResultStudent
+                            }
+
+                            setSelectedResultStudent={
+                                setSelectedResultStudent
+                            }
+
+                            loadStudentResult={
+                                loadStudentResult
+                            }
+
+                            resultLoading={
+                                resultLoading
+                            }
+
+                            studentResult={
+                                studentResult
+                            }
+
+                            setStudentResult={
+                                setStudentResult
+                            }
+
+                            isTeacher={isTeacher}
+                            isStudent={isStudent}
+                            user={user}
                         />
 
                     )}
@@ -906,5 +1202,6 @@ function App() {
         </div>
     );
 }
+
 
 export default App;

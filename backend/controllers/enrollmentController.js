@@ -124,3 +124,49 @@ export const getEnrollments = async (req, res) => {
         });
     }
 };
+
+// =========================
+// GET LOGGED-IN STUDENT RESULT
+// =========================
+
+export const getMyResult = async (req, res) => {
+
+    try {
+
+        const studentEmail = req.user.email;
+
+        const [students] = await pool.query(
+            `
+            SELECT id
+            FROM students
+            WHERE email = ?
+            `,
+            [studentEmail]
+        );
+
+        if (students.length === 0) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Student record not found"
+            });
+        }
+
+        // Existing result function ko reuse kar rahe hain
+        req.params.id = students[0].id;
+
+        return getResult(req, res);
+
+    } catch (error) {
+
+        console.error(
+            "GET MY RESULT ERROR:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch your result"
+        });
+    }
+};
