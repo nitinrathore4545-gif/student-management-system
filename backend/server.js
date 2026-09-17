@@ -6,6 +6,7 @@ import courseRoutes from "./routes/courseRoutes.js"
 import enrollmentRoutes from "./routes/enrollmentRoutes.js"
 import marksRoutes from "./routes/marksRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
+import helmet from "helmet"
 
 import pool from "./config/db.js"
 
@@ -14,6 +15,7 @@ dotenv.config()
 const app = express()
 
 app.use(cors())
+app.use(helmet())
 app.use(express.json())
 app.use("/api/students",studentRoutes)
 app.use("/api/courses",courseRoutes)
